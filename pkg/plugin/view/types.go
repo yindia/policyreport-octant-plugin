@@ -16,7 +16,6 @@ var (
 		{Name: "Result", Accessor: "Result"},
 		{Name: "Severity", Accessor: "Severity"},
 		{Name: "Kind", Accessor: "Kind"},
-		{Name: "ApiVersion", Accessor: "ApiVersion"},
 		{Name: "Properties", Accessor: "Properties"},
 	}
 )

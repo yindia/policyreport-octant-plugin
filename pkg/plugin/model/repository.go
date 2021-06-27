@@ -170,8 +170,8 @@ func MergePolicyReport(policyReportv1 []v1alpha1.PolicyReport, policyReportv2 []
 				Properties:      r.Data,
 			})
 		}
-
 	}
+	//TODO: // Remove common policy if any
 	//for _,v := range policyReportv2 {
 	//	for _,r := range v.Results {
 	//		reports = append(reports,*r)

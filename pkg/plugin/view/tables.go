@@ -30,9 +30,9 @@ func PrintPolicyReportTable(results []v1alpha2.PolicyReportResult, s *corev1.Obj
 			"Description": component.NewText(r.Description),
 			"Result":      component.NewText(string(r.Result)),
 			"Severity":    component.NewText(string(r.Severity)),
-			"Properties":  GetProperties(r),
 			"Kind":        component.NewText(s.Kind),
-			"APIVersion":  component.NewText(s.APIVersion),
+			"Properties":  GetProperties(r),
+
 		})
 	}
 	return table

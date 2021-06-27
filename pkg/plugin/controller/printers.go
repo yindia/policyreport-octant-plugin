@@ -64,21 +64,6 @@ func ReportTabPrinter(request *service.PrintRequest) (plugin.TabResponse, error)
 		}
 	}
 
-	d := component.NewDonutChart()
-	d.Config = component.DonutChartConfig{
-			Size: component.DonutChartSizeSmall,
-			Segments: []component.DonutSegment{
-				{
-					Count: results.Pass,
-					Status: component.NodeStatusOK,
-				},
-			},
-			Labels: component.DonutChartLabels{
-				Singular: "Policy Report",
-			},
-	}
-
-
 	flexLayout.AddSections([]component.FlexLayoutSection{
 		{
 			{
