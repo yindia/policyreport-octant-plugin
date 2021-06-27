@@ -13,9 +13,11 @@ var (
 	statefulSetGVK           = schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "StatefulSet"}
 	replicaSetGVK            = schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "ReplicaSet"}
 	replicationControllerGVK = schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ReplicationController"}
-	cronJobGVK               = schema.GroupVersionKind{Group: "batch", Version: "v1beta1", Kind: "CronJob"}
+	//cronJobGVK               = schema.GroupVersionKind{Group: "batch", Version: "v1beta1", Kind: "CronJob"}
 	jobGVK                   = schema.GroupVersionKind{Group: "batch", Version: "v1", Kind: "Job"}
 	PolicyReportGVK          = schema.GroupVersionKind{Group: "wgpolicyk8s.io", Version: "v1alpha2", Kind: "PolicyReport"}
+	NamespaceGVK             = schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Namespace"}
+	KyvernoGVK               = schema.GroupVersionKind{Group: "", Version: "v1", Kind: "Namespace"}
 )
 
 func GetCapabilities() *plugin.Capabilities {
@@ -27,10 +29,11 @@ func GetCapabilities() *plugin.Capabilities {
 			statefulSetGVK,
 			replicaSetGVK,
 			replicationControllerGVK,
-			cronJobGVK,
+			//cronJobGVK,
 			jobGVK,
 			nodeGVK,
 			PolicyReportGVK,
+			NamespaceGVK,
 		},
 		SupportsPrinterConfig: []schema.GroupVersionKind{
 			podGVK,
@@ -39,10 +42,11 @@ func GetCapabilities() *plugin.Capabilities {
 			statefulSetGVK,
 			replicaSetGVK,
 			replicationControllerGVK,
-			cronJobGVK,
+			//cronJobGVK,
 			jobGVK,
 			PolicyReportGVK,
+			NamespaceGVK,
 		},
-		IsModule: false,
+		IsModule: true,
 	}
 }

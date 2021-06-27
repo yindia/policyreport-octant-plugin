@@ -2,60 +2,124 @@ package view
 
 import (
 	"fmt"
+
 	"github.com/vmware-tanzu/octant/pkg/view/component"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/wg-policy-prototypes/policy-report/api/v1alpha2"
 )
 
-func GetProperties(r v1alpha2.PolicyReportResult) *component.Selectors {
+func GetProperties(r SingleReport) *component.Selectors {
 	var data []component.Selector
-	for k, v := range r.Properties {
+	for k, v := range r.Result.Properties {
 		data = append(data, component.NewLabelSelector(k, v))
 	}
 	s := component.NewSelectors(data)
 	return s
 }
 
-func PrintPolicyReportTable(results []v1alpha2.PolicyReportResult, s *corev1.ObjectReference, title string) *component.Table {
-	table := component.NewTableWithRows(title, title, policyReportCol, []component.TableRow{})
-	for _, r := range results {
-		if s == nil && len(r.Subjects) > 0 {
-			s.Name = r.Subjects[0].Name
-			s.Kind = r.Subjects[0].Kind
-			s.Namespace = r.Subjects[0].Namespace
+func setRow(table *component.Table, r SingleReport,isNamespace bool) {
+	if isNamespace {
+		table.Add(component.TableRow{
+			"Rule":        component.NewText(r.Result.Rule),
+			"Policxwy":    component.NewText(r.Result.Policy),
+			"Description": component.NewText(r.Result.Description),
+			"Result":      component.NewText(string(r.Result.Result)),
+			"Severity":    component.NewText(string(r.Result.Severity)),
+			"Kind":        component.NewText(r.Subject.Kind),
+			"Properties":  GetProperties(r),
+			"Resource":    component.NewText(r.Subject.Name),
+			"Namespace": component.NewText(r.Subject.Namespace),
+		})
+		return
+	}
+	table.Add(component.TableRow{
+		"Rule":        component.NewText(r.Result.Rule),
+		"Policxwy":    component.NewText(r.Result.Policy),
+		"Description": component.NewText(r.Result.Description),
+		"Result":      component.NewText(string(r.Result.Result)),
+		"Severity":    component.NewText(string(r.Result.Severity)),
+		"Kind":        component.NewText(r.Subject.Kind),
+		"Properties":  GetProperties(r),
+		"Resource":    component.NewText(r.Subject.Name),
+	})
+	return
+}
+
+func PrintPolicyReportTable(results *ReportView, s *corev1.ObjectReference, title string) *component.Table {
+	cols := policyReportCol
+	var isModule = true
+	if s == nil {
+		cols = append(cols, component.TableCol{
+			Name: "Resource", Accessor: "Resource",
+		})
+	} else {
+		isModule = false
+		if s.Kind == "Namespace" {
+			cols = append(cols, component.TableCol{
+				Name: "Resource", Accessor: "Resource",
+			})
+			cols = append(cols, component.TableCol{
+				Name: "Namespace", Accessor: "Namespace",
+			})
+		}
+	}
+	table := component.NewTableWithRows(title, title, cols, []component.TableRow{})
+	for _, r := range results.Reports {
+		if isModule {
+			setRow(table, r,false)
+			continue
+		}
+
+		if s.Kind == "Namespace" {
+			setRow(table, r,true)
+			continue
+		}
+
+		table.Add(component.TableRow{
+			"Rule":        component.NewText(r.Result.Rule),
+			"Policy":      component.NewText(r.Result.Policy),
+			"Description": component.NewText(r.Result.Description),
+			"Result":      component.NewText(string(r.Result.Result)),
+			"Severity":    component.NewText(string(r.Result.Severity)),
+			"Kind":        component.NewText(r.Subject.Kind),
+			"Properties":  GetProperties(r),
+		})
+	}
+	return table
+}
+
+func PrintFixes(results *ReportView, s *corev1.ObjectReference, title string) *component.Table {
+	cols := fixHighSeverity
+	if s.Kind == "Namespace" {
+		cols = append(cols, component.TableCol{
+			Name: "Resource", Accessor: "Resource",
+		})
+	}
+	table := component.NewTableWithRows(title, title, cols, []component.TableRow{})
+	for _, r := range results.HighSeverity {
+		if s.Kind == "Namespace" {
+			table.Add(component.TableRow{
+				"Rule":     component.NewText(r.Result.Rule),
+				"Policy":   component.NewText(r.Result.Policy),
+				"Result":   component.NewText(string(r.Result.Result)),
+				"Severity": component.NewText(string(r.Result.Severity)),
+				"Resource": component.NewText(string(r.Subject.Name)),
+			})
 		}
 		table.Add(component.TableRow{
-			"Rule":        component.NewText(r.Rule),
-			"Policy":      component.NewText(r.Policy),
-			"Description": component.NewText(r.Description),
-			"Result":      component.NewText(string(r.Result)),
-			"Severity":    component.NewText(string(r.Severity)),
-			"Kind":        component.NewText(s.Kind),
-			"Properties":  GetProperties(r),
-
+			"Rule":     component.NewText(r.Result.Rule),
+			"Policy":   component.NewText(r.Result.Policy),
+			"Result":   component.NewText(string(r.Result.Result)),
+			"Severity": component.NewText(string(r.Result.Severity)),
 		})
 	}
 	return table
 }
 
-func PrintFixes(results []v1alpha2.PolicyReportResult, title string) *component.Table {
-	table := component.NewTableWithRows(title, title, fixHighSeverity, []component.TableRow{})
-	for _, r := range results {
-		table.Add(component.TableRow{
-			"Rule":        component.NewText(r.Rule),
-			"Policy":      component.NewText(r.Policy),
-			"Result":      component.NewText(string(r.Result)),
-			"Severity":    component.NewText(string(r.Severity)),
-		})
-	}
-	return table
-}
-
-func CreateQuadrant(title string, results *v1alpha2.PolicyReportSummary) *component.Quadrant {
+func CreateQuadrant(title string, results *ReportView) *component.Quadrant {
 	quadrant := component.NewQuadrant(title)
-	quadrant.Set(component.QuadNW, "Pass", fmt.Sprintf("%v", results.Pass))
-	quadrant.Set(component.QuadNE, "Error", fmt.Sprintf("%v", results.Error))
-	quadrant.Set(component.QuadSE, "Warn", fmt.Sprintf("%v", results.Warn))
-	quadrant.Set(component.QuadSW, "Fail", fmt.Sprintf("%v", results.Fail))
+	quadrant.Set(component.QuadNW, "Pass", fmt.Sprintf("%v", results.Analytics.Pass))
+	quadrant.Set(component.QuadNE, "Error", fmt.Sprintf("%v", results.Analytics.Error))
+	quadrant.Set(component.QuadSE, "Warn", fmt.Sprintf("%v", results.Analytics.Warn))
+	quadrant.Set(component.QuadSW, "Fail", fmt.Sprintf("%v", results.Analytics.Fail))
 	return quadrant
 }
