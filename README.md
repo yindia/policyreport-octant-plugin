@@ -29,8 +29,5 @@ Then move the binary:
 You may need to create this directory if it does not exist.
 
 TODO:
-- Added more data points in policy report
-- Add policy engine data with policy report. In this case user use multiple engine like kyverno and falco.
-- Add Policy Report v1alpha2 support
-- Add Kyverno policy va lidation in octant editor
+- Add Kyverno policy validation in octant editor
 - Falco ecosystem 
