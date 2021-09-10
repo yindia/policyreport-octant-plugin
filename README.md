@@ -1,5 +1,4 @@
 ## Policy Report octant plugin 
-[Under development]
 
 Resource Policy Report Tab 
 ![alt text](./img/octant.png)
@@ -28,6 +27,3 @@ Then move the binary:
 
 You may need to create this directory if it does not exist.
 
-TODO:
-- Add Kyverno policy validation in octant editor
-- Falco ecosystem 
